@@ -41,93 +41,69 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <guisan.hpp>
-#ifndef _MSC_VER
-#include <SDL2/SDL.h>
-#else
-#include <SDL.h>
-#endif
+#include "ffcharacterchooser.hpp"
 
-#include "fflistbox.hpp"
-
-int FFListBox::mInstances = 0;
-gcn::Image *FFListBox::mHand = NULL;
-
-FFListBox::FFListBox()
+FFCharacterChooser::FFCharacterChooser()
 {
-    if (mInstances == 0)
-    {
-        mHand = gcn::Image::load("images/hand.png");
-    }
-
-    mInstances++;
+    setWidth(20);
+    setHeight(240);
+    mSelected = 0;
+    mDistance = 76;
+    mHand = gcn::Image::load("images/hand.png");
+    setFocusable(true);
+    addKeyListener(this);
     setBorderSize(0);
-    setWrappingEnabled(true);
 }
 
-FFListBox::~FFListBox()
+FFCharacterChooser::~FFCharacterChooser()
 {
-    mInstances--;
+    delete mHand;
+}
 
-    if (mInstances == 0)
+void FFCharacterChooser::draw(gcn::Graphics* graphics)
+{
+    if (isFocused())
     {
-        delete mHand;
+        graphics->drawImage(mHand, 0, mDistance*mSelected);
     }
 }
 
-void FFListBox::draw(gcn::Graphics* graphics)
+int FFCharacterChooser::getSelected()
 {
-		if (mListModel == NULL)
-		{
-        return;
-		}
-
-		graphics->setColor(getForegroundColor());
-		graphics->setFont(getFont());
-
-		int i, fontHeight;
-		int y = 0;
-
-		fontHeight = getFont()->getHeight();
-
-		/**
-		 * @todo Check cliprects so we do not have to iterate over elements in the list model
-		 */
-		for (i = 0; i < mListModel->getNumberOfElements(); ++i)
-		{
-        graphics->drawText(mListModel->getElementAt(i), 16, y);
-
-        if (i == mSelected)
-        {
-            if (isFocused())
-            {
-                graphics->drawImage(mHand, 0, y);
-            }
-            else if ((SDL_GetTicks() / 100) & 1)
-            {
-                graphics->drawImage(mHand, 0, y);
-            }
-        }
-
-        y += fontHeight;
-		}
+    return mSelected;
 }
 
-void FFListBox::setSelected(int i)
+void FFCharacterChooser::setSelected(int selected)
 {
-    if (i >= 0 &&
-        i < getListModel()->getNumberOfElements() &&
-        getListModel()->getElementAt(i) == "")
+    mSelected = selected;
+}
+
+void FFCharacterChooser::setDistance(int distance)
+{
+    mDistance = distance;
+}
+
+void FFCharacterChooser::keyPressed(gcn::KeyEvent& keyEvent)
+{
+    if (keyEvent.getKey().getValue() == gcn::Key::UP)
     {
-        if (i < getSelected())
+        mSelected--;
+        if (mSelected < 0)
         {
-            i--;
-        }
-        else
-        {
-            i++;
+            mSelected = 0;
         }
     }
-
-    ListBox::setSelected(i);
+    else if (keyEvent.getKey().getValue() == gcn::Key::DOWN)
+    {
+        mSelected++;
+        if (mSelected > 2)
+        {
+            mSelected = 2;
+        }
+    }
+    else if (keyEvent.getKey().getValue() == gcn::Key::ENTER)
+    {
+	#warning TODO: fix this
+        //distributeActionEvent();
+    }
 }

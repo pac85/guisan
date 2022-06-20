@@ -808,7 +808,7 @@ void FFDemo::input()
             }
             else if (mEvent.key.keysym.sym == SDLK_f)
             {
-                // TODO: Fullscreen
+                #warning TODO: Fullscreen
                 // Works with X11 only
                 //SDL_WM_ToggleFullScreen(mScreen);
             }
